@@ -5,6 +5,7 @@ using studentportal.api.Repositories;
 using System.Collections.Generic;
 using AutoMapper;
 using System.Threading.Tasks;
+using System;
 
 namespace studentportal.api.Controllers
 {
@@ -62,6 +63,25 @@ namespace studentportal.api.Controllers
             }
             */
             return Ok(mapper.Map<List<StudentDTO>>(students));
+        }
+
+        [HttpGet]
+        [Route("[controller]/{studentid:guid}")]
+        public async Task<IActionResult> GetStudentAsync([FromRoute] Guid studentid)
+        {
+            //Fetch student details
+            var Student = await studentRepository.GetStudentAsync(studentid);
+
+
+            //return student
+            if(Student == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(mapper.Map<Student>(Student));
+            
+
         }
     }
 }

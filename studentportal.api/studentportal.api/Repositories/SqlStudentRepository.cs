@@ -15,10 +15,19 @@ namespace studentportal.api.Repositories
         {
             this.context=context;
         }
+
+        public async Task<Student> GetStudentAsync(Guid StudentId)
+        {
+            //throw new NotImplementedException();
+            return await context.Student.Include(nameof(Gender)).Include(nameof(Address))
+                .FirstOrDefaultAsync(x => x.Id == StudentId);
+        }
+
         public async Task<List<Student>> GetStudentsAsync()
         {
             //throw new NotImplementedException();
             return await context.Student.Include(nameof(Gender)).Include(nameof(Address)).ToListAsync();
         }
+
     }
 }

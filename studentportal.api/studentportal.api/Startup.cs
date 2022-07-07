@@ -29,9 +29,19 @@ namespace studentportal.api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddCors((options) =>
+            {
+                options.AddPolicy("angularapplication", (builder) =>
+                {
+                    builder.WithOrigins("http://localhost:4200")
+                    .AllowAnyHeader()
+                    .WithMethods("Get", "POST", "PUT", "DELETE")
+                    .WithExposedHeaders("*");
+                });
+            });
             services.AddControllers();
             services.AddDbContext<StudentAdminContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StudentPortalDB")));
+
 
             services.AddScoped<IStudentRepository,SqlStudentRepository>();
             services.AddSwaggerGen(c =>
@@ -55,6 +65,9 @@ namespace studentportal.api
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            //for cors
+            app.UseCors("angularapplication");
 
             app.UseAuthorization();
 
