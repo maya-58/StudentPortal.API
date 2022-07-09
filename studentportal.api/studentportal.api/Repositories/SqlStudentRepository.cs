@@ -16,6 +16,18 @@ namespace studentportal.api.Repositories
             this.context=context;
         }
 
+        public async Task<bool> Exists(Guid studentId)
+        {
+            return await context.Student.AnyAsync(x => x.Id == studentId);
+            //throw new NotImplementedException();
+        }
+
+        public async Task<List<Gender>> GetGenderAsync()
+        {
+            //throw new NotImplementedException();
+            return await context.Gender.ToListAsync();
+        }
+
         public async Task<Student> GetStudentAsync(Guid StudentId)
         {
             //throw new NotImplementedException();
@@ -29,5 +41,29 @@ namespace studentportal.api.Repositories
             return await context.Student.Include(nameof(Gender)).Include(nameof(Address)).ToListAsync();
         }
 
+        public async Task<Student> UpdateStudent(Guid studentId, Student request)
+        {
+            // throw new NotImplementedException();
+
+            var existingStudent =await  GetStudentAsync(studentId);
+            if(existingStudent != null)
+            {
+                existingStudent.FirstName=request.FirstName;
+                existingStudent.LastName = request.LastName;
+                existingStudent.DateOfBirth = request.DateOfBirth;
+                existingStudent.GenderId = request.GenderId;
+                existingStudent.Mobile=request.Mobile;
+                existingStudent.Email = request.Email;
+                existingStudent.Address.PhysicalAddress = request.Address.PhysicalAddress;
+                existingStudent.Address.PostalAddress = request.Address.PostalAddress;
+
+                await context.SaveChangesAsync();
+                return existingStudent;
+            }
+            
+                return null;         
+
+
+        }
     }
 }
