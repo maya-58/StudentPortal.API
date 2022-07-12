@@ -14,6 +14,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using studentportal.api.Repositories;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace studentportal.api
 {
@@ -44,6 +46,7 @@ namespace studentportal.api
 
 
             services.AddScoped<IStudentRepository,SqlStudentRepository>();
+            services.AddScoped<IImageRepository, LocalStroageImageRepository>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "studentportal.api", Version = "v1" });
@@ -63,6 +66,12 @@ namespace studentportal.api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider=new PhysicalFileProvider(Path.Combine(env.ContentRootPath,"Resources")),
+                RequestPath="/Resources"
+            });
 
             app.UseRouting();
 

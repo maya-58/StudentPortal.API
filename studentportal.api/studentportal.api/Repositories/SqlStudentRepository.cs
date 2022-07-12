@@ -63,6 +63,19 @@ namespace studentportal.api.Repositories
             return await context.Student.Include(nameof(Gender)).Include(nameof(Address)).ToListAsync();
         }
 
+        public async Task<bool> UpdateProfileImage(Guid studentId, string imageUrl)
+        {
+            //throw new NotImplementedException();
+            var student= await GetStudentAsync(studentId);
+            if (student != null)
+            {
+                student.ProfileImageURl=imageUrl;
+                await context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
         public async Task<Student> UpdateStudent(Guid studentId, Student request)
         {
             // throw new NotImplementedException();

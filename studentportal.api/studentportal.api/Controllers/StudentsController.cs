@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using AutoMapper;
 using System.Threading.Tasks;
 using System;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace studentportal.api.Controllers
 {
@@ -14,10 +16,13 @@ namespace studentportal.api.Controllers
     {
         private readonly IStudentRepository studentRepository;
         private readonly IMapper mapper;
-        public StudentsController(IStudentRepository studentRepository,IMapper mapper)
+        private readonly IImageRepository imagerepository;
+        public StudentsController(IStudentRepository studentRepository,IMapper mapper,
+            IImageRepository imagerepository)
         {
             this.studentRepository = studentRepository;
             this.mapper = mapper;
+            this.imagerepository = imagerepository;
         }
 
         [HttpGet]
@@ -124,6 +129,26 @@ namespace studentportal.api.Controllers
 
             return CreatedAtAction(nameof(GetStudentAsync),new {studentId = student.Id},
                 mapper.Map<StudentDTO>(student));
+        }
+        [HttpPost]
+        [Route("[controller]/{studentid:guid}/upload-image")]
+        public async Task<IActionResult> UploadImage([FromRoute] Guid studentid, Microsoft.AspNetCore.Http.IFormFile profileImage)
+        {
+            //Check if user exist
+            if(await studentRepository.Exists(studentid))
+            {
+                var FileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName);
+                //upload image to local stroage
+                var fileImagePath=await imagerepository.Upload(profileImage, FileName);
+                //update the profile image path in the database
+               if(await studentRepository.UpdateProfileImage(studentid, fileImagePath))
+                {
+                    return Ok(fileImagePath);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error Uploading Image");
+            }
+            return NotFound();
+
         }
     }
 }
