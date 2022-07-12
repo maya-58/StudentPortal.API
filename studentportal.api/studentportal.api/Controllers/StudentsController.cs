@@ -66,7 +66,7 @@ namespace studentportal.api.Controllers
         }
 
         [HttpGet]
-        [Route("[controller]/{studentid:guid}")]
+        [Route("[controller]/{studentid:guid}"),ActionName("GetStudentAsync")]
         public async Task<IActionResult> GetStudentAsync([FromRoute] Guid studentid)
         {
             //Fetch student details
@@ -114,6 +114,16 @@ namespace studentportal.api.Controllers
             }
 
             return NotFound();
+        }
+
+        [HttpPost]
+        [Route("[controller]/Add")]
+        public async Task<IActionResult> AddStudentAsync([FromBody] AddStudentRequest request)
+        {
+            var student = await studentRepository.AddStudent(mapper.Map<DataModel.Student>(request));
+
+            return CreatedAtAction(nameof(GetStudentAsync),new {studentId = student.Id},
+                mapper.Map<StudentDTO>(student));
         }
     }
 }
