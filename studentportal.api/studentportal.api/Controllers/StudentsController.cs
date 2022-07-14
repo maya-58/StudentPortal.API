@@ -134,19 +134,37 @@ namespace studentportal.api.Controllers
         [Route("[controller]/{studentid:guid}/upload-image")]
         public async Task<IActionResult> UploadImage([FromRoute] Guid studentid, Microsoft.AspNetCore.Http.IFormFile profileImage)
         {
-            //Check if user exist
-            if(await studentRepository.Exists(studentid))
+            var validExtension = new List<string>
             {
-                var FileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName);
-                //upload image to local stroage
-                var fileImagePath=await imagerepository.Upload(profileImage, FileName);
-                //update the profile image path in the database
-               if(await studentRepository.UpdateProfileImage(studentid, fileImagePath))
+                ".jpeg",
+                ".png",
+                ".jpg"
+            };
+            if(profileImage != null && profileImage.Length >0)
+            {
+
+                var extension = Path.GetExtension(profileImage.FileName);
+                if (validExtension.Contains(extension))
                 {
-                    return Ok(fileImagePath);
+                    if (await studentRepository.Exists(studentid))
+                    {
+                        var FileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName);
+                        //upload image to local stroage
+                        var fileImagePath = await imagerepository.Upload(profileImage, FileName);
+                        //update the profile image path in the database
+                        if (await studentRepository.UpdateProfileImage(studentid, fileImagePath))
+                        {
+                            return Ok(fileImagePath);
+                        }
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Error Uploading Image");
+                    }
                 }
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error Uploading Image");
+                return BadRequest("This is not a valid format");
+
+                
             }
+            //Check if user exist
+            
             return NotFound();
 
         }
